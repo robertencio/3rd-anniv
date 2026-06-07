@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Anniversary ❤️</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #fff5f7; }
+        .romantic-font { font-family: 'Dancing Script', cursive; }
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        * { -webkit-tap-highlight-color: transparent; }
+
+        /* Puzzle Styles */
+        #puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background-color: #ffe4e6;
+            padding: 10px;
+            border-radius: 16px;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+        .tile {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="max-w-md mx-auto min-h-screen min-h-[100dvh] flex flex-col p-4 pb-12">
+    
+    <!-- HEADER -->
+    <transition name="fade">
+    <header v-if="activeTab !== 'welcome' && activeTab !== 'pin'" class="text-center py-6 sm:py-8">
+        <h1 class="romantic-font text-3xl sm:text-5xl text-rose-500 mb-2">Happy Anniversary!</h1>
+        <p class="text-slate-500 italic">Every moment with you is a gift.</p>
+    </header>
+    </transition>
+
+    <!-- TAB NAVIGATION -->
+    <transition name="fade">
+    <nav v-if="puzzleSolved" class="flex bg-white rounded-full shadow-sm p-1 mb-8 border border-rose-100">
+        <button @click="activeTab = 'quiz'" 
+                :class="activeTab === 'quiz' ? 'bg-rose-500 text-white' : 'text-rose-400'"
+                class="flex-1 py-2.5 sm:py-3 rounded-full transition-all duration-300 font-semibold text-[10px] sm:text-sm uppercase tracking-tighter sm:tracking-normal">
+            Quiz
+        </button>
+        <button v-if="quizPassed" @click="activeTab = 'letter'" 
+                :class="activeTab === 'letter' ? 'bg-rose-500 text-white' : 'text-rose-400'"
+                class="flex-1 py-2.5 sm:py-3 rounded-full transition-all duration-300 font-semibold text-[10px] sm:text-sm uppercase tracking-tighter sm:tracking-normal">
+            Letter
+        </button>
+        <button @click="activeTab = 'photos'" 
+                :class="activeTab === 'photos' ? 'bg-rose-500 text-white' : 'text-rose-400'"
+                class="flex-1 py-2.5 sm:py-3 rounded-full transition-all duration-300 font-semibold text-[10px] sm:text-sm uppercase tracking-tighter sm:tracking-normal">
+            Photos
+        </button>
+        <button @click="activeTab = 'playlist'" 
+                :class="activeTab === 'playlist' ? 'bg-rose-500 text-white' : 'text-rose-400'"
+                class="flex-1 py-2.5 sm:py-3 rounded-full transition-all duration-300 font-semibold text-[10px] sm:text-sm uppercase tracking-tighter sm:tracking-normal">
+            Playlist
+        </button>
+    </nav>
+    </transition>
+
+    <main class="flex-grow">
+        <transition name="fade" mode="out-in">
+        <!-- PIN TAB (Initial Access) -->
+        <div v-if="activeTab === 'pin'" key="pin" class="text-center space-y-12 py-12 flex flex-col items-center justify-center">
+            <header>
+                <h1 class="romantic-font text-4xl sm:text-5xl text-rose-500 mb-4 px-2">Secret Code</h1>
+                <p class="text-slate-500 italic">Enter our special 4-digit PIN</p>
+            </header>
+            
+            <div class="flex flex-col items-center space-y-6">
+                <input v-model="pinValue" type="password" maxlength="4" inputmode="numeric" 
+                       placeholder="••••" 
+                       class="w-48 text-center text-4xl tracking-[0.5em] border-b-4 border-rose-300 bg-transparent outline-none text-rose-500 font-bold placeholder-rose-200"
+                       @input="checkPin">
+                
+                <div v-if="pinError" class="text-rose-400 text-sm font-semibold animate-pulse">
+                    Try again, my love! ❤️
+                </div>
+            </div>
+            <div class="text-rose-200 text-3xl">🔒</div>
+        </div>
+
+        <!-- WELCOME TAB (Initial Front Page) -->
+        <div v-if="activeTab === 'welcome'" key="welcome" class="text-center space-y-12 py-12">
+            <header>
+                <h1 class="romantic-font text-4xl sm:text-6xl text-rose-500 leading-tight px-4">
+                    Happy Anniversary, My Dakne!
+                </h1>
+            </header>
+            <div class="text-rose-300 text-7xl animate-pulse">❤️</div>
+            <div class="space-y-10">
+                <p class="text-slate-500 text-lg sm:text-xl font-medium italic">
+                    "Another Year Down, A Lifetime to Go"
+                </p>
+                <button @click="activeTab = 'puzzle'" 
+                        class="inline-block w-full bg-rose-500 text-white py-4 px-12 rounded-full font-bold shadow-xl hover:bg-rose-600 transition-all transform hover:scale-105 active:scale-95 uppercase tracking-widest text-sm">
+                    Start
+                </button>
+            </div>
+        </div>
+
+        <!-- PUZZLE TAB (Front Page) -->
+        <div v-if="activeTab === 'puzzle'" key="puzzle" class="text-center space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-md border border-rose-50">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold text-slate-800">Solve this to start our journey!❤️</h2>
+                </div>
+
+                <div id="puzzle-grid" class="mb-6">
+                    <div v-for="(tile, index) in puzzleTiles" 
+                         :key="index"
+                         @click="handleTileClick(index)"
+                         :class="tile === null ? 'empty bg-transparent' : 'bg-rose-500 text-white shadow-sm cursor-pointer active:scale-95 transition-transform'"
+                         class="tile rounded-lg font-bold text-xl">
+                        {{ tile }}
+                    </div>
+                </div>
+
+                <button @click="shufflePuzzle" class="text-rose-400 text-sm font-semibold hover:text-rose-600 transition-colors">Reset Board</button>
+            </div>
+        </div>
+
+        <!-- QUIZ TAB -->
+        <div v-if="activeTab === 'quiz'" key="quiz" class="space-y-6">
+            
+            <!-- Quiz Progress/Lives -->
+            <div v-if="!quizFinished" class="bg-white rounded-2xl p-5 sm:p-6 shadow-md border border-rose-50">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-sm font-semibold text-rose-400">Question {{ currentQuestionIndex + 1 }} of {{ config.quiz.length }}</span>
+                    <div class="flex space-x-1">
+                        <span v-for="n in config.maxLives" :key="n" class="text-xl">
+                            {{ n <= lives ? '❤️' : '🖤' }}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-rose-100 h-2 rounded-full mb-8">
+                    <div class="bg-rose-500 h-2 rounded-full transition-all duration-500" 
+                         :style="{ width: ((currentQuestionIndex + 1) / config.quiz.length) * 100 + '%' }"></div>
+                </div>
+
+                <!-- Question -->
+                <h2 class="text-lg sm:text-xl font-bold text-slate-800 mb-6 leading-tight">{{ currentQuestion.question }}</h2>
+                
+                <!-- Options -->
+                <div class="space-y-3">
+                    <button v-for="(option, idx) in currentQuestion.options" 
+                            :key="idx"
+                            @click="handleAnswer(idx)"
+                            :disabled="selectedAnswer !== null"
+                            :class="getOptionClass(idx)"
+                            class="w-full text-left py-4 px-5 rounded-xl border-2 transition-all duration-200 font-medium text-sm sm:text-base">
+                        {{ option }}
+                    </button>
+                </div>
+
+                <!-- Hint -->
+                <p class="mt-6 text-sm text-slate-400 italic text-center">
+                    💡 Hint: {{ currentQuestion.hint }}
+                </p>
+            </div>
+
+            <!-- Quiz Result Screen -->
+            <div v-else class="bg-white rounded-2xl p-8 shadow-md border border-rose-50 text-center">
+                <div class="flex justify-center mb-4">
+                    <img v-if="quizPassed" :src="config.successSticker" alt="Success" class="w-40 h-40 object-contain">
+                    <img v-else :src="config.failSticker" alt="Game Over" class="w-40 h-40 object-contain">
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">
+                    {{ quizPassed ? 'Quiz Completed!' : 'Try Again!' }}
+                </h2>
+                <p class="text-slate-500 mb-6">
+                    {{ quizPassed ? 'You remember so much! I love that about us.' : 'Almost there! You need a perfect score to unlock the letter.' }}
+                </p>
+                <div class="bg-rose-50 rounded-lg p-4 mb-6">
+                    <p class="text-rose-600 font-bold">Hearts Remaining: {{ lives }} / {{ config.maxLives }}</p>
+                    <p v-if="correctCount > 0" class="text-xs text-rose-400 mt-1 uppercase tracking-wider">Bonus songs unlocked in playlist!</p>
+                </div>
+                
+                <div class="flex flex-col space-y-4">
+                    <button v-if="quizPassed" @click="activeTab = 'letter'" class="bg-rose-500 text-white py-3 px-6 rounded-full font-bold shadow-lg hover:bg-rose-600 transition-all transform active:scale-95">✉️ Read My Letter</button>
+                    <button @click="resetQuiz" class="text-rose-500 font-semibold underline">Try Again</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAYLIST TAB -->
+        <div v-if="activeTab === 'playlist'" key="playlist" class="space-y-4">
+            <div v-for="song in config.playlist" :key="song.id" class="relative">
+                
+                <!-- Song Card -->
+                <div @click="toggleSong(song)" 
+                     :class="{'opacity-60 grayscale-[0.5]': !isSongUnlocked(song)}"
+                     class="bg-white p-4 rounded-xl shadow-sm border border-rose-50 flex items-center cursor-pointer hover:shadow-md transition-shadow">
+                    
+                    <div class="text-3xl mr-4">{{ song.emoji }}</div>
+                    
+                    <div class="flex-grow">
+                        <div class="flex items-center">
+                            <h3 class="font-bold text-slate-800">{{ song.title }}</h3>
+                            <span v-if="!isSongUnlocked(song)" class="ml-2 text-xs">🔒</span>
+                        </div>
+                        <p class="text-sm text-slate-500">{{ song.artist }}</p>
+                        <span class="inline-block mt-1 px-2 py-0.5 bg-rose-50 text-rose-400 text-[10px] font-bold uppercase rounded">
+                            {{ song.tag }}
+                        </span>
+                    </div>
+
+                    <div class="text-rose-300">
+                        <svg v-if="activeSongId !== song.id" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Local Audio Player -->
+                <div v-if="activeSongId === song.id && isSongUnlocked(song)" class="mt-2 p-2 bg-rose-50 rounded-xl">
+                    <audio :src="song.audioSrc" controls class="w-full h-10"></audio>
+                </div>
+
+                <!-- Locked Overlay Message -->
+                <div v-if="activeSongId === song.id && !isSongUnlocked(song)" class="mt-2 p-4 bg-slate-100 rounded-lg text-center text-sm text-slate-500 italic">
+                    Get more correct answers in the quiz to unlock this memory!
+                </div>
+            </div>
+        </div>
+
+        <!-- PHOTOS TAB -->
+        <div v-if="activeTab === 'photos'" key="photos" class="space-y-6">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                <div v-for="(photo, index) in config.photos" :key="index" 
+                     class="group relative aspect-square bg-white rounded-2xl overflow-hidden shadow-md border-4 border-white transition-all hover:shadow-xl">
+                    <img :src="photo.url" @click="openImage(photo.url)" class="w-full h-full object-cover cursor-zoom-in transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                        <p class="text-white text-xs font-medium">{{ photo.caption }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LETTER TAB -->
+        <div v-if="activeTab === 'letter'" key="letter" class="space-y-6">
+            <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-rose-50 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 text-rose-50 text-9xl opacity-20 rotate-12">❤️</div>
+                
+                <div class="relative z-10">
+                    <h2 class="romantic-font text-3xl text-rose-500 mb-6 border-b border-rose-100 pb-2">
+                        {{ config.letter.title }}
+                    </h2>
+                    <div class="text-slate-600 leading-relaxed space-y-4 whitespace-pre-wrap italic">
+                        {{ config.letter.content }}
+                    </div>
+                    <div class="mt-8 pt-6 border-t border-rose-100 text-right">
+                        <p class="romantic-font text-2xl text-rose-500">{{ config.letter.signature }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </transition>
+    </main>
+
+    <!-- FULLSCREEN IMAGE MODAL -->
+    <transition name="fade">
+        <div v-if="fullscreenImageUrl" 
+             @click="closeFullscreen" 
+             class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 cursor-zoom-out">
+            <img :src="fullscreenImageUrl" @click.stop class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+            <button class="absolute top-6 right-6 text-white text-4xl">&times;</button>
+        </div>
+    </transition>
+
+    <footer class="mt-12 text-center text-slate-400 text-xs">
+        Made with ❤️ for my favorite person
+    </footer>
+</div>
+
+<script>
+    // --- CONFIGURATION OBJECT ---
+    // Edit your data here!
+    const CONFIG = {
+        successSticker: "img/nailong-blush.png",
+        failSticker: "img/nailong-cry.png",
+        maxLives: 3,
+        quiz: [
+            {
+                question: "Which game did we start playing together?",
+                options: ["Call of Duty: Mobile", "Mobile Legends", "Farlight 84", "Roblox"],
+                correctAnswer: 1,
+                hint: "Me being snobbish"
+            },
+            {
+                question: "What anime that we both like?",
+                options: ["Nisekoi", "The Fragrant Flower Blooms with Dignity", "My Dress-up Darling", "Overflow"],
+                correctAnswer: 0,
+                hint: "Mafia's daughter and Yakuza's son"
+            },
+            {
+                question: "Game that we both like the most?",
+                options: ["Mobile Legends", "Roblox", "Chess", "Farlight 84"],
+                correctAnswer: 3,
+                hint: "Favorite battle royale game we play together!"
+            },
+            {
+                question: "Which city did we visit for our first trip?",
+                options: ["Paris", "Manila", "Tokyo", "Chicago"],
+                correctAnswer: 2,
+                hint: "Arigato, Sayonara, Konnichiwa!"
+            }
+        ],
+        playlist: [
+            { id: 1, title: "Germany & Rome", artist: "The Ridleys", emoji: "♪", audioSrc: "music/THE RIDLEYS- GERMANY ROME (LYRICS VIDEO).mp3", isLocked: false },
+            { id: 2, title: "Bawat Daan", artist: "Ebe Dancel", emoji: "♪", audioSrc: "music/Ebe Dancel - Bawat Daan (Lyrics).mp3", isLocked: false },
+            { id: 3, title: " This Town", artist: "Niall Horan", emoji: "♪", audioSrc: "music/Niall Horan - This Town (Official Lyric Video).mp3", isLocked: false },
+            { id: 4, title: "Forevermore", artist: "Juris", emoji: "♪", audioSrc: "music/Forevermore - Juris (Music Video) [sdF6Dn5ahbM].mp3", isLocked: true },
+            { id: 5, title: "Nahanap Kita", artist: "Amiel Sol", emoji: "♪", audioSrc: "music/Nahanap Kita - Amiel Sol (Lyrics).mp3", isLocked: true },
+            { id: 6, title: "A Whole New World", artist: "Leroy Sanchez & Jessica SanchezLeroy Sanchez", emoji: "♪", audioSrc: "music/A WHOLE NEW WORLD - Leroy Sanchez Jessica Sanchez (Music Video).mp3", isLocked: true },
+            { id: 7, title: "Valentine", artist: "Laufey", emoji: "♪", audioSrc: "music/Laufey - Valentine (Lyrics).mp3", isLocked: true },
+            { id: 8, title: "Your Love", artist: "Juris", emoji: "♪", audioSrc: "music/Your Love - Juris Fernandez(Lyrics) [imFB2VrhYg4].mp3", isLocked: true }
+        ],
+        photos: [
+            { url: "image/image1.jpg", },
+            { url: "image/image2.jpeg", },
+            { url: "image/image3.jpeg", },
+            { url: "image/image4.jpg", }
+        ],
+        letter: {
+            title: "My Dearest Dakne,",
+            content: "Happy 3rd Anniversary! \n\nDistance might keep us from holding hands right now, but it can't stop us from growing closer every single day. Even with all these miles between us, you’re still the person I want to share every win and every sunset with. \n\nThank you for making the distance feel a little shorter with every call and every game we play together. I can't wait for the day when we don't have to say goodbye to a screen anymore. I love you!",
+            signature: "Always Yours, Reitot"
+        }
+    };
+
+    const { createApp, ref, computed } = Vue;
+
+    createApp({
+        setup() {
+            const config = CONFIG;
+            const activeTab = ref('pin');
+            const currentQuestionIndex = ref(0);
+            const puzzleSolved = ref(false);
+            const lives = ref(config.maxLives);
+            const correctCount = ref(0);
+            const quizFinished = ref(false);
+            const quizPassed = ref(false);
+            const selectedAnswer = ref(null);
+            const activeSongId = ref(null);
+            const pinValue = ref('');
+            const pinError = ref(false);
+            const fullscreenImageUrl = ref(null);
+
+            // Puzzle Logic
+            const puzzleTiles = ref([]);
+            const puzzleMoves = ref(0);
+
+            const initPuzzle = () => {
+                shufflePuzzle();
+            };
+
+            const shufflePuzzle = () => {
+                let tiles = [...Array(15).keys()].map(i => i + 1);
+                tiles.push(null);
+                
+                // Simulate random moves to ensure solvability
+                for (let i = 0; i < 100; i++) {
+                    const emptyIdx = tiles.indexOf(null);
+                    const neighbors = [];
+                    const row = Math.floor(emptyIdx / 4);
+                    const col = emptyIdx % 4;
+
+                    if (row > 0) neighbors.push(emptyIdx - 4);
+                    if (row < 3) neighbors.push(emptyIdx + 4);
+                    if (col > 0) neighbors.push(emptyIdx - 1);
+                    if (col < 3) neighbors.push(emptyIdx + 1);
+
+                    const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+                    [tiles[emptyIdx], tiles[randomNeighbor]] = [tiles[randomNeighbor], tiles[emptyIdx]];
+                }
+                puzzleTiles.value = tiles;
+                puzzleMoves.value = 0;
+            };
+
+            const handleTileClick = (index) => {
+                const emptyIdx = puzzleTiles.value.indexOf(null);
+                const row1 = Math.floor(index / 4), col1 = index % 4;
+                const row2 = Math.floor(emptyIdx / 4), col2 = emptyIdx % 4;
+                
+                if (Math.abs(row1 - row2) + Math.abs(col1 - col2) === 1) {
+                    const newTiles = [...puzzleTiles.value];
+                    [newTiles[index], newTiles[emptyIdx]] = [newTiles[emptyIdx], newTiles[index]];
+                    puzzleTiles.value = newTiles;
+                    puzzleMoves.value++;
+                    checkPuzzleWin();
+                }
+            };
+
+            const checkPuzzleWin = () => {
+                const winState = [...Array(15).keys()].map(i => i + 1);
+                winState.push(null);
+                const isWin = puzzleTiles.value.every((val, i) => val === winState[i]);
+                if (isWin && puzzleMoves.value > 0) {
+                    // Slight delay so the user can see the completed puzzle before the transition
+                    setTimeout(() => {
+                        puzzleSolved.value = true;
+                        activeTab.value = 'quiz';
+                    }, 800);
+                }
+            };
+
+            const currentQuestion = computed(() => config.quiz[currentQuestionIndex.value]);
+
+            const handleAnswer = (index) => {
+                selectedAnswer.value = index;
+                
+                setTimeout(() => {
+                    if (index !== currentQuestion.value.correctAnswer) {
+                        lives.value--;
+                    } else {
+                        correctCount.value++;
+                    }
+
+                    if (lives.value <= 0) {
+                        quizFinished.value = true;
+                        quizPassed.value = false;
+                    } else if (currentQuestionIndex.value + 1 >= config.quiz.length) {
+                        quizFinished.value = true;
+                        quizPassed.value = (correctCount.value === config.quiz.length);
+                    } else {
+                        currentQuestionIndex.value++;
+                    }
+                    selectedAnswer.value = null;
+                }, 1000);
+            };
+
+            const getOptionClass = (index) => {
+                if (selectedAnswer.value === null) return 'bg-white border-slate-100 hover:border-rose-200 text-slate-600';
+                
+                if (index === currentQuestion.value.correctAnswer) {
+                    return 'bg-green-50 border-green-500 text-green-700';
+                }
+                if (index === selectedAnswer.value && index !== currentQuestion.value.correctAnswer) {
+                    return 'bg-red-50 border-red-500 text-red-700';
+                }
+                return 'bg-white border-slate-100 text-slate-300';
+            };
+
+            const toggleSong = (song) => {
+                if (activeSongId.value === song.id) {
+                    activeSongId.value = null;
+                } else {
+                    activeSongId.value = song.id;
+                }
+            };
+
+            const checkPin = () => {
+                pinError.value = false;
+                if (pinValue.value.length === 4) {
+                    if (pinValue.value === '0608') {
+                        activeTab.value = 'welcome';
+                    } else {
+                        pinError.value = true;
+                        setTimeout(() => { pinValue.value = ''; }, 500);
+                    }
+                }
+            };
+
+            const openImage = (url) => {
+                fullscreenImageUrl.value = url;
+            };
+
+            const closeFullscreen = () => {
+                fullscreenImageUrl.value = null;
+            };
+
+            const isSongUnlocked = (song) => {
+                if (!song.isLocked) return true;
+                if (song.id === 4) return correctCount.value >= 1;
+                if (song.id === 5) return correctCount.value >= 2;
+                if (song.id === 6) return correctCount.value >= 3;
+                if (song.id === 7 || song.id === 8) return correctCount.value >= 4;
+                return false;
+            };
+
+            const resetQuiz = () => {
+                currentQuestionIndex.value = 0;
+                lives.value = config.maxLives;
+                correctCount.value = 0;
+                quizFinished.value = false;
+                selectedAnswer.value = null;
+            };
+
+            initPuzzle();
+
+            return {
+                config, activeTab, currentQuestionIndex, puzzleSolved, lives, correctCount, quizFinished, 
+                quizPassed, currentQuestion, selectedAnswer, handleAnswer,
+                getOptionClass, resetQuiz, activeSongId, toggleSong, isSongUnlocked,
+                puzzleTiles, puzzleMoves, handleTileClick, shufflePuzzle, openImage, fullscreenImageUrl, closeFullscreen,
+                pinValue, pinError, checkPin
+            };
+        }
+    }).mount('#app');
+</script>
+
+</body>
+</html>
